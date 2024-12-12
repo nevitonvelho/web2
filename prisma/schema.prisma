@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int         @id @default(autoincrement())
+  name           String
+  email          String      @unique
+  password       String
+  role           Role        @default(USER) // USER ou ADMIN
+  projects       Project[]   @relation("UserProjects")
+  createdProjects Project[]  @relation("Creator")
+  knowledge      KnowledgeOnUser[]
+}
+
+model Project {
+  id             Int            @id @default(autoincrement())
+  name           String
+  summary        String
+  link           String
+  keywords       Keyword[]      @relation("ProjectKeywords")
+  developers     User[]         @relation("UserProjects")
+  createdBy      Int
+  creator        User           @relation("Creator", fields: [createdBy], references: [id])
+}
+
+model Keyword {
+  id             Int         @id @default(autoincrement())
+  name           String      @unique
+  projects       Project[]   @relation("ProjectKeywords")
+}
+
+model Knowledge {
+  id             Int                @id @default(autoincrement())
+  name           String             @unique
+  users          KnowledgeOnUser[]
+}
+
+model KnowledgeOnUser {
+  id             Int         @id @default(autoincrement())
+  userId         Int
+  user           User        @relation(fields: [userId], references: [id])
+  knowledgeId    Int
+  knowledge      Knowledge   @relation(fields: [knowledgeId], references: [id])
+  level          Int         // Nível de 0 a 10
+}
+
+enum Role {
+  USER
+  ADMIN
+}
