@@ -31,3 +31,18 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Erro ao criar o projeto." }, { status: 500 });
   }
 }
+
+export async function GET() {
+  try {
+    const projects = await prisma.project.findMany({
+      include: {
+        keywords: true,
+      },
+    });
+    return NextResponse.json(projects, { status: 200 });
+  } catch (error) {
+    console.error("Erro ao buscar projetos:", error);
+    return NextResponse.json({ error: "Erro ao buscar os projetos." }, { status: 500 });
+  }
+}
+
