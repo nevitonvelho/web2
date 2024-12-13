@@ -1,8 +1,5 @@
-
-
-import Link from "next/link"
-import SignOutPage from "./SignOutPage"
 import Teste from "./Teste"
+import AuthCheck from "./AuthCheck"
 
 
 export default function NavBar(){
@@ -16,7 +13,7 @@ export default function NavBar(){
                   <img src="UTFPR_logo.svg" alt="" className="w-full h-full " />
                 </div>
                 <p className="mt-1.5 text-sm text-gray-500">
-                  Projeots alunos de engenhari de software da UTFPR - Dois Viazinhos
+                  Projeots alunos de engenharia de software da UTFPR - Dois Viazinhos
                 </p>
               </div>
 

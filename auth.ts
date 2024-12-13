@@ -22,6 +22,7 @@ export const { handlers: { GET, POST }, auth } = NextAuth({
         const matches = compareSync(password, user.password ?? "");
         if (!matches) return null;
 
+        // Retorna os dados do usuário necessários para a sessão
         return { id: user.id, name: user.name, email: user.email, role: user.role };
       },
     }),
@@ -29,25 +30,19 @@ export const { handlers: { GET, POST }, auth } = NextAuth({
 
   callbacks: {
     async jwt({ token, user }) {
-      // No login, adiciona a role ao token
+      // Adiciona informações do usuário ao token durante o login
       if (user) {
+        token.id = user.id;
         token.role = user.role;
-      } else {
-        // Busca a role no banco para garantir atualização
-        const dbUser = await db.user.findUnique({
-          where: { email: token.email }, // Garante que o token possui o email
-          select: { role: true },
-        });
-        if (dbUser) {
-          token.role = dbUser.role;
-        }
       }
       return token;
     },
 
     async session({ session, token }) {
+      // Adiciona o ID e a role ao objeto da sessão
       if (session.user) {
-        session.user.role = token.role; // Propaga o papel atualizado para a sessão
+        session.user.id = token.id;
+        session.user.role = token.role;
       }
       return session;
     },

@@ -16,5 +16,5 @@ export async function middleware(req) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*"], // Protege rotas que começam com "/admin"
+  matcher: ["/admin/:path*", "/projects/:path*"], // Protege rotas que começam com "/admin"
 };
