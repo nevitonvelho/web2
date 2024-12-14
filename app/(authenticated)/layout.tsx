@@ -9,14 +9,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
 
-        <div className="h-[700px] hero">
-
+        <div className="hero">
           <NavBar/>
-          <AuthCheck/>
-
+          {/* <AuthCheck/> */}
         </div>
 
-        <div className="max-w-[1200px] m-auto">
+        <div className="max-w-[1200px] m-auto ">
         <div className=" ">
             <SessionProvider>{children}</SessionProvider>
         </div>

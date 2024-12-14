@@ -54,7 +54,10 @@ model KnowledgeOnUser {
   knowledgeId    Int
   knowledge      Knowledge   @relation(fields: [knowledgeId], references: [id])
   level          Int         // Nível de 0 a 10
+
+  @@unique([userId, knowledgeId]) // Define a combinação como única
 }
+
 
 enum Role {
   USER
