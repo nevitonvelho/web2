@@ -48,15 +48,16 @@ model Knowledge {
 }
 
 model KnowledgeOnUser {
-  id             Int         @id @default(autoincrement())
-  userId         Int
-  user           User        @relation(fields: [userId], references: [id])
-  knowledgeId    Int
-  knowledge      Knowledge   @relation(fields: [knowledgeId], references: [id])
-  level          Int         // Nível de 0 a 10
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  knowledgeId Int
+  level       Int
+  user        User      @relation(fields: [userId], references: [id])
+  knowledge   Knowledge @relation(fields: [knowledgeId], references: [id])
 
-  @@unique([userId, knowledgeId]) // Define a combinação como única
+  @@unique([userId, knowledgeId]) // Chave única
 }
+
 
 
 enum Role {

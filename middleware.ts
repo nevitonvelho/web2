@@ -1,14 +1,18 @@
-import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
+import { NextResponse } from "next/server";
 
 export async function middleware(req) {
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
-  if (!token) {
+  const { pathname } = req.nextUrl;
+
+  // Redireciona usuários não logados tentando acessar rotas protegidas
+  if (!token && (pathname.startsWith("/authenticated") || pathname === "/user")) {
     return NextResponse.redirect(new URL("/auth/signin", req.url));
   }
 
-  if (req.url.includes("/admin") && token.role !== "ADMIN") {
+  // Permite apenas usuários ADMIN na rota "/admin"
+  if (pathname.startsWith("/admin") && token?.role !== "ADMIN") {
     return NextResponse.redirect(new URL("/", req.url));
   }
 
@@ -16,5 +20,5 @@ export async function middleware(req) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/projects/:path*"], // Protege rotas que começam com "/admin"
+  matcher: ["/authenticated/:path*", "/admin/:path*", "/user"], // Rotas protegidas
 };
