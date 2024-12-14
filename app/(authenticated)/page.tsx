@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import KnowledgeProportionChart from "../components/KnowledgeReport";
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<any[]>([]);
@@ -60,6 +61,7 @@ export default function ProjectsPage() {
   return (
     <div className="p-6">
       <h1 className="text-2xl mb-4">Projetos</h1>
+      <KnowledgeProportionChart/>
 
       {/* Filtro por palavra-chave */}
       <div className="mb-6">

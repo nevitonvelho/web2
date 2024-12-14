@@ -1,79 +1,68 @@
-"use client"
+"use client";
 
-import { AreaChart } from "@/components/AreaChart"
+import { useEffect, useState } from "react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
-const chartdata = [
-  {
-    date: "Jan 23",
-    SolarPanels: 2890,
-    Inverters: 2338,
-  },
-  {
-    date: "Feb 23",
-    SolarPanels: 2756,
-    Inverters: 2103,
-  },
-  {
-    date: "Mar 23",
-    SolarPanels: 3322,
-    Inverters: 2194,
-  },
-  {
-    date: "Apr 23",
-    SolarPanels: 3470,
-    Inverters: 2108,
-  },
-  {
-    date: "May 23",
-    SolarPanels: 3475,
-    Inverters: 1812,
-  },
-  {
-    date: "Jun 23",
-    SolarPanels: 3129,
-    Inverters: 1726,
-  },
-  {
-    date: "Jul 23",
-    SolarPanels: 3490,
-    Inverters: 1982,
-  },
-  {
-    date: "Aug 23",
-    SolarPanels: 2903,
-    Inverters: 2012,
-  },
-  {
-    date: "Sep 23",
-    SolarPanels: 2643,
-    Inverters: 2342,
-  },
-  {
-    date: "Oct 23",
-    SolarPanels: 2837,
-    Inverters: 2473,
-  },
-  {
-    date: "Nov 23",
-    SolarPanels: 2954,
-    Inverters: 3848,
-  },
-  {
-    date: "Dec 23",
-    SolarPanels: 3239,
-    Inverters: 3736,
-  },
-]
+export default function KnowledgeReport() {
+  const [knowledgeData, setKnowledgeData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-export const AreaChart1 = () => (
-  <AreaChart
-    className="h-64"
-    data={chartdata}
-    index="date"
-    categories={["SolarPanels", "Inverters"]}
-    valueFormatter={(number: number) =>
-      `$${Intl.NumberFormat("us").format(number).toString()}`
+  useEffect(() => {
+    async function fetchKnowledgeReport() {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const response = await fetch("/api/knowledge/report");
+        if (!response.ok) {
+          throw new Error("Erro ao carregar dados do relatório.");
+        }
+
+        const data = await response.json();
+        setKnowledgeData(data);
+      } catch (err: any) {
+        console.error(err);
+        setError(err.message || "Erro ao carregar o gráfico.");
+      } finally {
+        setLoading(false);
+      }
     }
-    onValueChange={(v) => console.log(v)}
-  />
-)
+
+    fetchKnowledgeReport();
+  }, []);
+
+  if (loading) {
+    return <p className="text-center text-gray-500">Carregando...</p>;
+  }
+
+  if (error) {
+    return <p className="text-center text-red-500">{error}</p>;
+  }
+
+  return (
+    <div className="p-6">
+      <h1 className="text-2xl mb-4">Relatório de Conhecimentos</h1>
+      <ResponsiveContainer width="100%" height={400}>
+        <BarChart
+          data={knowledgeData}
+          margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip />
+          <Bar dataKey="count" fill="#82ca9d" />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
