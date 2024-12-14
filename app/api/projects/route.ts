@@ -5,52 +5,37 @@ import { auth } from "@/auth";
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const all = searchParams.get("all"); // Verifica se o parâmetro `all` foi passado
+    const keywordId = searchParams.get("keywordId");
 
-    const session = await auth();
+    let projects;
 
-    // Caso o usuário esteja deslogado, retorna todos os projetos
-    if (!session || !session.user) {
-      const projects = await prisma.project.findMany({
+    if (keywordId) {
+      // Filtra projetos vinculados à palavra-chave
+      projects = await prisma.project.findMany({
+        where: {
+          keywords: {
+            some: {
+              id: parseInt(keywordId, 10),
+            },
+          },
+        },
         include: {
           keywords: true,
-          developers: true,
         },
       });
-      return NextResponse.json({ projects }, { status: 200 });
-    }
-
-    const userId = Number(session.user.id);
-
-    // Se o parâmetro "all=true" for passado, retorna todos os projetos para usuários logados
-    if (all === "true") {
-      const projects = await prisma.project.findMany({
+    } else {
+      // Retorna todos os projetos
+      projects = await prisma.project.findMany({
         include: {
           keywords: true,
-          developers: true,
         },
       });
-      return NextResponse.json({ projects, userId }, { status: 200 });
     }
 
-    // Caso contrário, retorna apenas os projetos do usuário logado
-    const userProjects = await prisma.project.findMany({
-      where: {
-        OR: [
-          { createdBy: userId }, // Projetos criados pelo usuário
-          { developers: { some: { id: userId } } }, // Projetos onde o usuário é desenvolvedor
-        ],
-      },
-      include: {
-        keywords: true,
-        developers: true,
-      },
-    });
-
-    return NextResponse.json({ projects: userProjects, userId }, { status: 200 });
+    return NextResponse.json({ projects });
   } catch (error) {
     console.error("Erro ao buscar projetos:", error);
-    return NextResponse.json({ error: "Erro ao buscar os projetos." }, { status: 500 });
+    return NextResponse.json({ error: "Erro ao buscar projetos." }, { status: 500 });
   }
 }
 
