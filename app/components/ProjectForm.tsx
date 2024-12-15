@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useSession } from "next-auth/react";
+import { Label, TextInput, Textarea, Button, Alert } from "flowbite-react";
 
 export default function ProjectForm() {
   const { data: session, status } = useSession();
@@ -25,15 +26,7 @@ export default function ProjectForm() {
     }
 
     const keywordArray = keywords.split(",").map((kw) => kw.trim());
-    const userId = parseInt(session.user.id, 10); // Converte o ID para número
-
-    console.log("Dados enviados:", {
-      name,
-      summary,
-      link,
-      keywords: keywordArray,
-      createdBy: userId,
-    });
+    const userId = parseInt(session.user.id, 10);
 
     try {
       const response = await fetch("/api/projects", {
@@ -46,7 +39,7 @@ export default function ProjectForm() {
           summary,
           link,
           keywords: keywordArray,
-          createdBy: userId, // Envia como número
+          createdBy: userId,
         }),
       });
 
@@ -68,42 +61,71 @@ export default function ProjectForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
-      <input
-        type="text"
-        placeholder="Nome do Projeto"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        className="border p-2 rounded"
-        required
-      />
-      <textarea
-        placeholder="Resumo do Projeto"
-        value={summary}
-        onChange={(e) => setSummary(e.target.value)}
-        className="border p-2 rounded"
-        required
-      />
-      <input
-        type="url"
-        placeholder="Link do Projeto"
-        value={link}
-        onChange={(e) => setLink(e.target.value)}
-        className="border p-2 rounded"
-        required
-      />
-      <input
-        type="text"
-        placeholder="Palavras-chave (separadas por vírgula)"
-        value={keywords}
-        onChange={(e) => setKeywords(e.target.value)}
-        className="border p-2 rounded"
-        required
-      />
-      <button type="submit" className="bg-blue-500 text-white py-2 px-4 rounded">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-md mx-auto">
+      <h1 className="text-2xl font-bold text-center mb-4">Cadastrar Projeto</h1>
+      
+      {/* Nome do Projeto */}
+      <div>
+        <Label htmlFor="name" value="Nome do Projeto" />
+        <TextInput
+          id="name"
+          type="text"
+          placeholder="Digite o nome do projeto"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
+      </div>
+
+      {/* Resumo */}
+      <div>
+        <Label htmlFor="summary" value="Resumo do Projeto" />
+        <Textarea
+          id="summary"
+          placeholder="Descreva o resumo do projeto"
+          value={summary}
+          onChange={(e) => setSummary(e.target.value)}
+          required
+        />
+      </div>
+
+      {/* Link */}
+      <div>
+        <Label htmlFor="link" value="Link do Projeto" />
+        <TextInput
+          id="link"
+          type="url"
+          placeholder="https://exemplo.com"
+          value={link}
+          onChange={(e) => setLink(e.target.value)}
+          required
+        />
+      </div>
+
+      {/* Palavras-chave */}
+      <div>
+        <Label htmlFor="keywords" value="Palavras-chave (separadas por vírgula)" />
+        <TextInput
+          id="keywords"
+          type="text"
+          placeholder="Exemplo: tecnologia, inovação, IA"
+          value={keywords}
+          onChange={(e) => setKeywords(e.target.value)}
+          required
+        />
+      </div>
+
+      {/* Botão de Submissão */}
+      <Button type="submit" color="blue">
         Cadastrar Projeto
-      </button>
-      {message && <p>{message}</p>}
+      </Button>
+
+      {/* Mensagem de feedback */}
+      {message && (
+        <Alert color={message.includes("Erro") ? "failure" : "success"}>
+          {message}
+        </Alert>
+      )}
     </form>
   );
 }

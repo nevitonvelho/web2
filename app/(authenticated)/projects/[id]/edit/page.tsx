@@ -3,19 +3,20 @@
 import ManageDevelopers from "@/app/components/ManageDevelopers";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { Label, TextInput, Textarea, Button, Alert } from "flowbite-react";
 
 async function fetchProject(id: string) {
-  const response = await fetch(`/api/projects?id=${id}`);
+  const response = await fetch(`/api/projects/${id}`);
   if (!response.ok) {
     throw new Error("Erro ao buscar o projeto.");
   }
   return response.json();
 }
 
-export default function EditProjectPage({ params }: { params: { id: string } }) {
+export default function EditProjectPage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
-  const { id } = params;
 
+  const [params, setParams] = useState<{ id: string } | null>(null);
   const [project, setProject] = useState<any>(null);
   const [form, setForm] = useState({
     name: "",
@@ -25,10 +26,22 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
   });
   const [message, setMessage] = useState("");
 
+  // Descompactar `params`
+  useEffect(() => {
+    async function loadParams() {
+      const resolvedParams = await paramsPromise;
+      setParams(resolvedParams);
+    }
+    loadParams();
+  }, [paramsPromise]);
+
+  // Carregar o projeto com base nos `params`
   useEffect(() => {
     async function loadProject() {
+      if (!params?.id) return;
+
       try {
-        const data = await fetchProject(id);
+        const data = await fetchProject(params.id);
         setProject(data);
         setForm({
           name: data.name,
@@ -37,11 +50,11 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
           keywords: data.keywords.map((kw: any) => kw.name).join(", "),
         });
       } catch (error) {
-        console.error(error);
+        console.error("Erro ao carregar o projeto:", error);
       }
     }
     loadProject();
-  }, [id]);
+  }, [params]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -50,6 +63,8 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!params?.id) return;
+
     try {
       const keywords = form.keywords.split(",").map((kw) => kw.trim());
       const response = await fetch(`/api/projects`, {
@@ -57,7 +72,7 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ id: Number(id), ...form, keywords }),
+        body: JSON.stringify({ id: Number(params.id), ...form, keywords }),
       });
 
       if (response.ok) {
@@ -78,74 +93,77 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
 
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white rounded-lg shadow-md">
-      <ManageDevelopers projectId={id} />
+      {/* Gerenciamento de Desenvolvedores */}
+      <ManageDevelopers projectId={params?.id || ""} />
 
       <h1 className="text-2xl font-bold mb-6">Editar Projeto</h1>
-      <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        {/* Nome do Projeto */}
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-            Nome do Projeto
-          </label>
-          <input
-            type="text"
+          <Label htmlFor="name" value="Nome do Projeto" />
+          <TextInput
             id="name"
             name="name"
+            type="text"
+            placeholder="Digite o nome do projeto"
             value={form.name}
             onChange={handleChange}
-            className="mt-1 block w-full p-2 border rounded-lg"
             required
           />
         </div>
+
+        {/* Resumo */}
         <div>
-          <label htmlFor="summary" className="block text-sm font-medium text-gray-700">
-            Resumo
-          </label>
-          <textarea
+          <Label htmlFor="summary" value="Resumo do Projeto" />
+          <Textarea
             id="summary"
             name="summary"
+            placeholder="Descreva o resumo do projeto"
             value={form.summary}
             onChange={handleChange}
-            className="mt-1 block w-full p-2 border rounded-lg"
             required
           />
         </div>
+
+        {/* Link */}
         <div>
-          <label htmlFor="link" className="block text-sm font-medium text-gray-700">
-            Link
-          </label>
-          <input
-            type="url"
+          <Label htmlFor="link" value="Link do Projeto" />
+          <TextInput
             id="link"
             name="link"
+            type="url"
+            placeholder="https://exemplo.com"
             value={form.link}
             onChange={handleChange}
-            className="mt-1 block w-full p-2 border rounded-lg"
             required
           />
         </div>
+
+        {/* Palavras-Chave */}
         <div>
-          <label htmlFor="keywords" className="block text-sm font-medium text-gray-700">
-            Palavras-Chave (separadas por vírgulas)
-          </label>
-          <input
-            type="text"
+          <Label htmlFor="keywords" value="Palavras-Chave (separadas por vírgulas)" />
+          <TextInput
             id="keywords"
             name="keywords"
+            type="text"
+            placeholder="Exemplo: inovação, tecnologia, IA"
             value={form.keywords}
             onChange={handleChange}
-            className="mt-1 block w-full p-2 border rounded-lg"
           />
         </div>
-        <button
-          type="submit"
-          className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600"
-        >
-          Atualizar Projeto
-        </button>
-        {message && <p className="text-center text-sm text-green-500">{message}</p>}
-      </form>
 
-      
+        {/* Botão de Submissão */}
+        <Button type="submit" color="blue">
+          Atualizar Projeto
+        </Button>
+
+        {/* Mensagem de Feedback */}
+        {message && (
+          <Alert color={message.includes("sucesso") ? "success" : "failure"} className="mt-4">
+            {message}
+          </Alert>
+        )}
+      </form>
     </div>
   );
 }

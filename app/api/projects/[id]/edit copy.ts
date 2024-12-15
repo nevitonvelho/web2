@@ -2,33 +2,23 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { auth } from "@/auth";
 
-export async function PUT(
-  req: Request,
-  { params }: { params: { id: string } | null }
-) {
-  if (!params || !params.id) {
-    return NextResponse.json({ error: "ID do projeto não fornecido." }, { status: 400 });
-  }
 
+export async function PUT(req: Request, { params }: { params: { id: string } }) {
   try {
     const projectId = parseInt(params.id, 10);
-    if (isNaN(projectId)) {
-      return NextResponse.json({ error: "ID do projeto inválido." }, { status: 400 });
-    }
-
     const { name, summary, link, keywords } = await req.json();
 
-    if (!name || !summary || !link) {
+    if (!name || !summary || !link || isNaN(projectId)) {
       return NextResponse.json({ error: "Dados inválidos." }, { status: 400 });
     }
 
-    // Continua com a lógica de autorização e atualização
+    // Verifica se o usuário é o criador ou desenvolvedor do projeto
     const session = await auth();
     const userId = Number(session?.user?.id);
 
     const project = await prisma.project.findUnique({
       where: { id: projectId },
-      include: { developers: true, keywords: true },
+      include: { developers: true },
     });
 
     if (!project) {
@@ -42,10 +32,7 @@ export async function PUT(
       return NextResponse.json({ error: "Permissão negada." }, { status: 403 });
     }
 
-    const existingKeywords = project.keywords.map((kw) => kw.name);
-    const newKeywords = keywords.filter((kw: string) => !existingKeywords.includes(kw));
-    const removedKeywords = existingKeywords.filter((kw) => !keywords.includes(kw));
-
+    // Atualiza o projeto
     const updatedProject = await prisma.project.update({
       where: { id: projectId },
       data: {
@@ -53,12 +40,9 @@ export async function PUT(
         summary,
         link,
         keywords: {
-          connectOrCreate: newKeywords.map((keyword: string) => ({
+          connectOrCreate: keywords.map((keyword: string) => ({
             where: { name: keyword },
             create: { name: keyword },
-          })),
-          disconnect: removedKeywords.map((keyword: string) => ({
-            name: keyword,
           })),
         },
       },
