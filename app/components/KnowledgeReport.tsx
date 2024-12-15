@@ -1,15 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
 
 export default function KnowledgeReport() {
   const [knowledgeData, setKnowledgeData] = useState([]);
@@ -31,7 +22,7 @@ export default function KnowledgeReport() {
         setKnowledgeData(data);
       } catch (err: any) {
         console.error(err);
-        setError(err.message || "Erro ao carregar o gráfico.");
+        setError(err.message || "Erro ao carregar o relatório.");
       } finally {
         setLoading(false);
       }
@@ -51,18 +42,32 @@ export default function KnowledgeReport() {
   return (
     <div className="p-6">
       <h1 className="text-2xl mb-4">Relatório de Conhecimentos</h1>
-      <ResponsiveContainer width="100%" height={400}>
-        <BarChart
-          data={knowledgeData}
-          margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-        >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis />
-          <Tooltip />
-          <Bar dataKey="count" fill="#82ca9d" />
-        </BarChart>
-      </ResponsiveContainer>
+      <div className="overflow-x-auto">
+        <table className="table-auto w-full border-collapse border border-gray-200 shadow-sm">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 border-b">
+                Nome do Conhecimento
+              </th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 border-b">
+                Proporção de Alunos
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {knowledgeData.map((knowledge: any) => (
+              <tr key={knowledge.id} className="odd:bg-white even:bg-gray-50">
+                <td className="px-4 py-2 text-sm text-gray-700 border-b">
+                  {knowledge.name}
+                </td>
+                <td className="px-4 py-2 text-sm text-gray-700 border-b">
+                  {knowledge.count} alunos
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

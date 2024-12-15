@@ -74,77 +74,134 @@ export default function ManageUsers() {
   const handleDelete = async (id: number) => {
     const confirmDelete = window.confirm("Tem certeza de que deseja excluir este usuário?");
     if (!confirmDelete) return;
-  
+
     const res = await fetch(`/api/users/${id}`, {
       method: "DELETE",
     });
-  
+
     if (res.ok) {
       setMessage("Usuário excluído com sucesso!");
-      setUsers((prev) => prev.filter((user) => user.id !== id)); // Atualizar lista de usuários localmente
+      setUsers((prev) => prev.filter((user) => user.id !== id));
     } else {
       const errorData = await res.json();
       setMessage(`Erro ao excluir usuário: ${errorData.error}`);
     }
   };
-  
-  
 
   return (
-    <div>
-      <h1>Gerenciar Usuários</h1>
-      {message && <p>{message}</p>}
-      <div>
-        <input
-          type="text"
-          placeholder="Nome"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        {!editUserId && (
-          <input
-            type="password"
-            placeholder="Senha"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        )}
-        <select value={role} onChange={(e) => setRole(e.target.value)}>
-          <option value="USER">Usuário</option>
-          <option value="ADMIN">Administrador</option>
-        </select>
-        <button onClick={handleAddOrUpdateUser}>
-          {editUserId ? "Atualizar Usuário" : "Adicionar Usuário"}
-        </button>
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-6">Gerenciar Usuários</h1>
+
+      {message && <div className="mb-4 p-2 bg-blue-100 text-blue-700 rounded">{message}</div>}
+
+      <div className="bg-white shadow rounded p-4 mb-6">
+        <h2 className="text-xl font-semibold mb-4">{editUserId ? "Editar Usuário" : "Adicionar Usuário"}</h2>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleAddOrUpdateUser();
+          }}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+        >
+          <div>
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+              Nome
+            </label>
+            <input
+              id="name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="mt-1 block w-full border-gray-300 rounded shadow-sm"
+            />
+          </div>
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="mt-1 block w-full border-gray-300 rounded shadow-sm"
+            />
+          </div>
+          {!editUserId && (
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                Senha
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="mt-1 block w-full border-gray-300 rounded shadow-sm"
+              />
+            </div>
+          )}
+          <div>
+            <label htmlFor="role" className="block text-sm font-medium text-gray-700">
+              Papel
+            </label>
+            <select
+              id="role"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              className="mt-1 block w-full border-gray-300 rounded shadow-sm"
+            >
+              <option value="USER">Usuário</option>
+              <option value="ADMIN">Administrador</option>
+            </select>
+          </div>
+          <div className="flex items-end">
+            <button
+              type="submit"
+              className="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600"
+            >
+              {editUserId ? "Atualizar" : "Adicionar"}
+            </button>
+          </div>
+        </form>
       </div>
 
-      <h2>Lista de Usuários</h2>
-      <ul>
-        {users.map((user) => (
-          <li key={user.id} className="flex justify-between items-center">
-            <div>
-              {user.name} - {user.email} - {user.role}
-            </div>
-            <div>
-              <button onClick={() => handleEdit(user)} className="text-blue-500 hover:underline">
-                Editar
-              </button>
-              <button
-                onClick={() => handleDelete(user.id)}
-                className="text-red-500 hover:underline ml-2"
-              >
-                Excluir
-              </button>
-            </div>
-          </li>
-        ))}
-      </ul>
+      <h2 className="text-xl font-semibold mb-4">Lista de Usuários</h2>
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-white shadow rounded">
+          <thead>
+            <tr>
+              <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">Nome</th>
+              <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">Email</th>
+              <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">Papel</th>
+              <th className="px-4 py-2 text-right text-sm font-semibold text-gray-600">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map((user) => (
+              <tr key={user.id} className="border-t">
+                <td className="px-4 py-2 text-sm">{user.name}</td>
+                <td className="px-4 py-2 text-sm">{user.email}</td>
+                <td className="px-4 py-2 text-sm">{user.role}</td>
+                <td className="px-4 py-2 text-right">
+                  <button
+                    onClick={() => handleEdit(user)}
+                    className="text-blue-500 hover:underline mr-4"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    onClick={() => handleDelete(user.id)}
+                    className="text-red-500 hover:underline"
+                  >
+                    Excluir
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

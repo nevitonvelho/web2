@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import KnowledgeProportionChart from "../components/KnowledgeReport";
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<any[]>([]);
@@ -9,6 +8,7 @@ export default function ProjectsPage() {
   const [selectedKeyword, setSelectedKeyword] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [knowledgeReport, setKnowledgeReport] = useState<any[]>([]); // Relatório de conhecimentos
 
   // Buscar palavras-chave ao carregar a página
   useEffect(() => {
@@ -24,7 +24,21 @@ export default function ProjectsPage() {
     fetchKeywords();
   }, []);
 
-  // Buscar projetos: todos ou filtrados
+  // Buscar relatório de conhecimentos
+  useEffect(() => {
+    async function fetchKnowledgeReport() {
+      try {
+        const response = await fetch("/api/knowledge/report");
+        const data = await response.json();
+        setKnowledgeReport(data);
+      } catch (err) {
+        console.error("Erro ao buscar relatório de conhecimentos:", err);
+      }
+    }
+    fetchKnowledgeReport();
+  }, []);
+
+  // Buscar projetos: todos ou filtrados por palavra-chave
   useEffect(() => {
     async function fetchProjects() {
       setLoading(true);
@@ -33,16 +47,15 @@ export default function ProjectsPage() {
       try {
         const endpoint = selectedKeyword
           ? `/api/projects?keywordId=${selectedKeyword}`
-          : "/api/projects";
+          : "/api/projects?all=true"; // Endpoint para todos os projetos ou filtrados por palavra-chave
+
         const response = await fetch(endpoint);
-        if (!response.ok) {
-          throw new Error("Erro ao buscar projetos.");
-        }
-        const data = await response.json();
-        setProjects(data.projects || []);
-      } catch (err: any) {
+        if (!response.ok) throw new Error("Erro ao buscar projetos.");
+        const { projects } = await response.json();
+        setProjects(projects || []);
+      } catch (err) {
         console.error("Erro ao carregar projetos:", err);
-        setError(err.message || "Erro ao carregar projetos.");
+        setError("Erro ao carregar projetos.");
       } finally {
         setLoading(false);
       }
@@ -51,7 +64,7 @@ export default function ProjectsPage() {
   }, [selectedKeyword]);
 
   if (loading) {
-    return <p className="text-center text-gray-500">Carregando...</p>;
+    return <p className="text-center text-gray-500">Carregando projetos...</p>;
   }
 
   if (error) {
@@ -60,10 +73,8 @@ export default function ProjectsPage() {
 
   return (
     <div className="p-6">
+     
       <h1 className="text-2xl mb-4">Projetos</h1>
-      <KnowledgeProportionChart/>
-
-      {/* Filtro por palavra-chave */}
       <div className="mb-6">
         <label htmlFor="keyword" className="block text-sm font-medium text-gray-700">
           Filtrar Projetos por Palavra-Chave
@@ -99,17 +110,39 @@ export default function ProjectsPage() {
                 </span>
               ))}
             </div>
-            <a
-              href={project.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-500 text-sm hover:underline mt-4"
-            >
-              Ver Projeto
-            </a>
+            <div className="mt-4">
+              <a
+                href={project.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 text-sm hover:underline"
+              >
+                Ver Projeto
+              </a>
+            </div>
           </div>
         ))}
       </div>
+
+      <h1 className="text-2xl mb-4">Relatório de Conhecimentos</h1>
+      {/* Relatório de Conhecimentos */}
+      <table className="table-auto w-full mb-6 border border-gray-300 rounded-lg">
+        <thead>
+          <tr className="bg-gray-100">
+            <th className="px-4 py-2 border">Conhecimento</th>
+            <th className="px-4 py-2 border">Quantidade de Usuários</th>
+          </tr>
+        </thead>
+        <tbody>
+          {knowledgeReport.map((item) => (
+            <tr key={item.id} className="hover:bg-gray-50">
+              <td className="px-4 py-2 border">{item.name}</td>
+              <td className="px-4 py-2 border text-center">{item.count}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
     </div>
   );
 }

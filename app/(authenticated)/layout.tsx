@@ -14,10 +14,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {/* <AuthCheck/> */}
         </div>
 
-        <div className="max-w-[1200px] m-auto ">
-        <div className=" ">
-            <SessionProvider>{children}</SessionProvider>
-        </div>
+        <div className="max-w-[1500px] m-auto ">
+          <SessionProvider>{children}</SessionProvider>
         </div>
       </body>
     </html>

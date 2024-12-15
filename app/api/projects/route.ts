@@ -5,34 +5,40 @@ import { auth } from "@/auth";
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const keywordId = searchParams.get("keywordId");
+    const isUserProjects = searchParams.get("user") === "true";
 
-    let projects;
-
-    if (keywordId) {
-      // Filtra projetos vinculados à palavra-chave
-      projects = await prisma.project.findMany({
-        where: {
-          keywords: {
-            some: {
-              id: parseInt(keywordId, 10),
-            },
-          },
-        },
-        include: {
-          keywords: true,
-        },
-      });
-    } else {
-      // Retorna todos os projetos
-      projects = await prisma.project.findMany({
-        include: {
-          keywords: true,
-        },
-      });
+    const session = await auth();
+    if (!session || !session.user) {
+      return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
     }
 
-    return NextResponse.json({ projects });
+    const userId = Number(session.user.id);
+
+    if (isUserProjects) {
+      // Retorna projetos vinculados ao usuário (criados ou onde ele é desenvolvedor)
+      const projects = await prisma.project.findMany({
+        where: {
+          OR: [
+            { createdBy: userId }, // Projetos criados pelo usuário
+            { developers: { some: { id: userId } } }, // Projetos onde o usuário é desenvolvedor
+          ],
+        },
+        include: {
+          keywords: true, // Inclui palavras-chave associadas
+        },
+      });
+
+      return NextResponse.json({ projects });
+    } else {
+      // Retorna todos os projetos (caso necessário em outro endpoint)
+      const projects = await prisma.project.findMany({
+        include: {
+          keywords: true,
+        },
+      });
+
+      return NextResponse.json({ projects });
+    }
   } catch (error) {
     console.error("Erro ao buscar projetos:", error);
     return NextResponse.json({ error: "Erro ao buscar projetos." }, { status: 500 });

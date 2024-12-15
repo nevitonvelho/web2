@@ -9,12 +9,11 @@ interface Knowledge {
 }
 
 export default function ManageKnowledge() {
-  const [knowledgeList, setKnowledgeList] = useState<Knowledge[]>([]); // Define o tipo do estado
+  const [knowledgeList, setKnowledgeList] = useState<Knowledge[]>([]);
   const [name, setName] = useState("");
   const [editKnowledgeId, setEditKnowledgeId] = useState<number | null>(null);
   const [message, setMessage] = useState("");
 
-  // Buscar conhecimentos ao carregar o componente
   useEffect(() => {
     async function fetchKnowledge() {
       try {
@@ -30,7 +29,6 @@ export default function ManageKnowledge() {
     fetchKnowledge();
   }, []);
 
-  // Adicionar ou atualizar um conhecimento
   const handleAddOrUpdateKnowledge = async () => {
     if (!name.trim()) {
       setMessage("O nome do conhecimento não pode estar vazio.");
@@ -59,7 +57,6 @@ export default function ManageKnowledge() {
       setName("");
       setEditKnowledgeId(null);
 
-      // Atualiza a lista local sem recarregar a página
       const updatedKnowledge: Knowledge = await res.json();
       if (editKnowledgeId) {
         setKnowledgeList((prev) =>
@@ -74,7 +71,6 @@ export default function ManageKnowledge() {
     }
   };
 
-  // Excluir um conhecimento
   const handleDelete = async (id: number) => {
     const confirmDelete = window.confirm("Deseja excluir este conhecimento?");
     if (!confirmDelete) return;
@@ -91,43 +87,94 @@ export default function ManageKnowledge() {
       }
 
       setMessage("Conhecimento excluído!");
-      setKnowledgeList((prev) => prev.filter((knowledge) => knowledge.id !== id)); // Atualiza a lista local
+      setKnowledgeList((prev) => prev.filter((knowledge) => knowledge.id !== id));
     } catch (error) {
       console.error("Erro ao excluir conhecimento:", error);
       setMessage("Erro ao excluir conhecimento.");
     }
   };
 
-  // Preencher campos para edição
   const handleEdit = (knowledge: Knowledge) => {
     setEditKnowledgeId(knowledge.id);
     setName(knowledge.name);
   };
 
   return (
-    <div>
-      <h1>Gerenciar Conhecimentos</h1>
-      {message && <p>{message}</p>}
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-6">Gerenciar Conhecimentos</h1>
 
-      <input
-        type="text"
-        placeholder="Nome"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
-      <button onClick={handleAddOrUpdateKnowledge}>
-        {editKnowledgeId ? "Atualizar" : "Adicionar"}
-      </button>
+      {message && <div className="mb-4 p-2 bg-blue-100 text-blue-700 rounded">{message}</div>}
 
-      <ul>
-        {knowledgeList.map((knowledge) => (
-          <li key={knowledge.id}>
-            {knowledge.name}
-            <button onClick={() => handleEdit(knowledge)}>Editar</button>
-            <button onClick={() => handleDelete(knowledge.id)}>Excluir</button>
-          </li>
-        ))}
-      </ul>
+      <div className="bg-white shadow rounded p-4 mb-6">
+        <h2 className="text-xl font-semibold mb-4">
+          {editKnowledgeId ? "Editar Conhecimento" : "Adicionar Conhecimento"}
+        </h2>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleAddOrUpdateKnowledge();
+          }}
+          className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+        >
+          <div>
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+              Nome do Conhecimento
+            </label>
+            <input
+              id="name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="mt-1 block w-full border-gray-300 rounded shadow-sm"
+            />
+          </div>
+          <div className="flex items-end">
+            <button
+              type="submit"
+              className="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600"
+            >
+              {editKnowledgeId ? "Atualizar" : "Adicionar"}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <h2 className="text-xl font-semibold mb-4">Lista de Conhecimentos</h2>
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-white shadow rounded">
+          <thead>
+            <tr>
+              <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">
+                Nome
+              </th>
+              <th className="px-4 py-2 text-right text-sm font-semibold text-gray-600">
+                Ações
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {knowledgeList.map((knowledge) => (
+              <tr key={knowledge.id} className="border-t">
+                <td className="px-4 py-2 text-sm">{knowledge.name}</td>
+                <td className="px-4 py-2 text-right">
+                  <button
+                    onClick={() => handleEdit(knowledge)}
+                    className="text-blue-500 hover:underline mr-4"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    onClick={() => handleDelete(knowledge.id)}
+                    className="text-red-500 hover:underline"
+                  >
+                    Excluir
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
