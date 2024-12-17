@@ -83,7 +83,7 @@ export default function ProjectsPage() {
               ))}
             </div>
 
-            <div className="absolute top-2 right-3">
+            {/* <div className="absolute top-2 right-3">
               <button data-modal-target="default-modal" data-modal-toggle="default-modal" className="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
                 Adicionar Desenvolvedores
               </button>
@@ -93,7 +93,7 @@ export default function ProjectsPage() {
                 <div className="relative p-4 w-full max-w-2xl max-h-full">
                    dfff
                 </div>
-            </div>
+            </div> */}
 
             
             <div className="mt-4 flex justify-between items-center">
