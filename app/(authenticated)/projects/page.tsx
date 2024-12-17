@@ -69,7 +69,7 @@ export default function ProjectsPage() {
       <h1 className="text-2xl mb-6">Meus Projetos</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {projects.map((project) => (
-          <div key={project.id} className="border p-4 rounded-lg shadow-sm">
+          <div key={project.id} className="border p-4 rounded-lg shadow-sm relative">
             <h2 className="text-lg font-bold">{project.name}</h2>
             <p className="text-sm text-gray-600">{project.summary}</p>
             <div className="mt-2 flex flex-wrap gap-2">
@@ -82,6 +82,20 @@ export default function ProjectsPage() {
                 </span>
               ))}
             </div>
+
+            <div className="absolute top-2 right-3">
+              <button data-modal-target="default-modal" data-modal-toggle="default-modal" className="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
+                Adicionar Desenvolvedores
+              </button>
+            </div>
+
+            <div id="default-modal"  aria-hidden="true" className="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+                <div className="relative p-4 w-full max-w-2xl max-h-full">
+                   dfff
+                </div>
+            </div>
+
+            
             <div className="mt-4 flex justify-between items-center">
               <Link
                 href={`/projects/${project.id}/edit`}

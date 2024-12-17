@@ -9,25 +9,27 @@ export async function GET(req: Request) {
     const isUserProjects = searchParams.get("user") === "true";
     const keywordId = searchParams.get("keywordId");
 
-    const session = await auth();
-    if (!session || !session.user) {
-      return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
-    }
-
-    const userId = Number(session.user.id);
-
-    // Configura a condição WHERE com base nos filtros
+    // Removemos a verificação de sessão e userId
     let whereCondition: any = {};
 
+    // Se for solicitado apenas os projetos do usuário
     if (isUserProjects) {
+      const session = await auth();
+      if (!session || !session.user) {
+        return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
+      }
+
+      const userId = Number(session.user.id);
+
       whereCondition = {
         OR: [
-          { createdBy: userId }, // Projetos criados pelo usuário
-          { developers: { some: { id: userId } } }, // Projetos onde o usuário é desenvolvedor
+          { createdBy: userId },
+          { developers: { some: { id: userId } } },
         ],
       };
     }
 
+    // Filtra por keywordId, se especificado
     if (keywordId) {
       whereCondition = {
         ...whereCondition,
@@ -39,11 +41,11 @@ export async function GET(req: Request) {
       };
     }
 
-    // Busca projetos com a condição WHERE configurada
+    // Busca os projetos
     const projects = await prisma.project.findMany({
       where: whereCondition,
       include: {
-        keywords: true, // Inclui palavras-chave associadas
+        keywords: true,
       },
     });
 
@@ -53,6 +55,7 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Erro ao buscar projetos." }, { status: 500 });
   }
 }
+
 
 
 export async function POST(req: Request) {

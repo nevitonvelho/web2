@@ -7,7 +7,7 @@ export async function middleware(req) {
   const { pathname } = req.nextUrl;
 
   // Redireciona usuários não logados tentando acessar rotas protegidas
-  if (!token && (pathname.startsWith("/authenticated") || pathname === "/user")) {
+  if (!token && (pathname.startsWith("/authenticated") || pathname === "/user" || pathname.startsWith("/projects"))) {
     return NextResponse.redirect(new URL("/auth/signin", req.url));
   }
 
@@ -20,5 +20,5 @@ export async function middleware(req) {
 }
 
 export const config = {
-  matcher: ["/authenticated/:path*", "/admin/:path*", "/user"], // Rotas protegidas
+  matcher: ["/authenticated/:path*", "/admin/:path*", "/user", "/projects/:path*"], // Rotas protegidas
 };

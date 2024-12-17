@@ -11,7 +11,7 @@ export default function NavBar(){
     return(
         <>
         <nav className="bg-white border-gray-200 dark:bg-gray-900">
-          <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+          <div className="max-w-screen-2xl flex flex-wrap items-center justify-between mx-auto p-4">
             <Link href="/" className="flex items-center space-x-3 rtl:space-x-reverse">
                 <img src="logo.svg" className="h-8" alt="Logo" />
                 <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">| WEB2</span>
@@ -45,7 +45,7 @@ export default function NavBar(){
                 </>
               ) : (
                 <Link
-                  href="/auth/login"
+                  href="/auth/signin"
                   className="block py-2 px-3 text-white bg-blue-700 rounded md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500"
                 >
                   Logar
